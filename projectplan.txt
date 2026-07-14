@@ -1,0 +1,49 @@
+-> User logs in
+-> List of groups, create group, notifications
+-> onClick group - list of expenses, add expense
+-> onClick expense - edit expense, delete expense
+-> add/edit/delete expense -> notify all group members
+
+
+Tables:
+
+User:
+	userid
+	username
+	password
+
+Group:
+	groupid
+	name
+	created_by
+
+GroupMember:
+	groupid
+	userid
+
+Expense:
+	expenseid
+	groupid
+	paidby(userid)
+	amount
+
+Item:
+	itemid
+	amount
+
+ExpenseItem:
+	expenseid
+	itemid
+
+ItemShare:
+	itemid
+	userid
+	share
+
+Settlements:
+	settlementid
+	groupid
+	fromuserid
+	touserid
+	amount
+	
