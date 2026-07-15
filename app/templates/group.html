@@ -2,23 +2,40 @@
 
 {% block content %}
 
+<div class="card">
+
 <h1>{{ group.name }}</h1>
 
 <details>
-    <summary>Show Group Members</summary>
 
-    <ul>
-        {% for member in group.members %}
-            <li>
-                {% if member.user.id == group.created_by %}
-                    <strong>{{ member.user.name }} (Created Group)</strong>
-                {% else %}
-                    {{ member.user.name }}
-                {% endif %}
-            </li>
-        {% endfor %}
+    <summary>
+        Show Group Members
+    </summary>
+
+    <ul class="member-list">
+
+    {% for member in group.members %}
+
+        <li>
+
+            {% if member.user.id == group.created_by %}
+
+                <strong>{{ member.user.name }} 👑</strong>
+
+            {% else %}
+
+                {{ member.user.name }}
+
+            {% endif %}
+
+        </li>
+
+    {% endfor %}
+
     </ul>
 
 </details>
+
+</div>
 
 {% endblock %}

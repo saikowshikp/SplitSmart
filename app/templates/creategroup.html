@@ -2,22 +2,26 @@
 
 {% block content %}
 
+<div class="card">
+
 <h1>Create Group</h1>
 
-<form method="POST" action="{{ url_for('group.creategroup') }}">
+<form method="POST"
+      action="{{ url_for('group.creategroup') }}">
 
-    <label for="name">Group Name:</label>
-    <input 
-        type="text" 
-        id="name" 
-        name="groupname" 
-        required
-    >
+    <label>Group Name</label>
 
-    <br><br>
+    <input
+        type="text"
+        name="groupname"
+        required>
 
-    <button type="submit">Create Group</button>
+    <button type="submit">
+        Create Group
+    </button>
 
 </form>
+
+</div>
 
 {% endblock %}

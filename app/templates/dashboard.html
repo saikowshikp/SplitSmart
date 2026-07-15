@@ -2,33 +2,53 @@
 
 {% block content %}
 
-<h1>Dashboard</h1>
+<div class="card">
 
-<p>Welcome, {{ user.name }}</p>
+    <h1>Dashboard</h1>
 
-<h2>Your Groups</h2>
+    <p class="welcome">
+        Welcome, <strong>{{ user.name }}</strong>
+    </p>
 
-{% if user.group_memberships %}
-    <ul>
+    <h2>Your Groups</h2>
+
+    {% if user.group_memberships %}
+
+    <div class="group-list">
+
         {% for membership in user.group_memberships %}
-            <li>
-                <a href="{{ url_for('group.group', groupid=membership.group.id) }}">
-                    {{ membership.group.name }}
-                </a>
-            </li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>You are not a member of any groups.</p>
-{% endif %}
 
-<p>
-    <a href="{{ url_for('group.joingroup')}}">
-        <button>Join Existing Group</button>
-    </a>
-    <a href="{{ url_for('group.creategroup') }}">
-        <button>Create Group</button>
-    </a>
-</p>
+        <a class="group-card"
+           href="{{ url_for('group.group', groupid=membership.group.id) }}">
+
+            {{ membership.group.name }}
+
+        </a>
+
+        {% endfor %}
+
+    </div>
+
+    {% else %}
+
+    <p>You are not a member of any groups.</p>
+
+    {% endif %}
+
+    <div class="button-row">
+
+        <a class="btn"
+           href="{{ url_for('group.joingroup')}}">
+            Join Existing Group
+        </a>
+
+        <a class="btn btn-primary"
+           href="{{ url_for('group.creategroup') }}">
+            Create Group
+        </a>
+
+    </div>
+
+</div>
 
 {% endblock %}

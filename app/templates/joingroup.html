@@ -2,22 +2,26 @@
 
 {% block content %}
 
-<h1>Join an existing Group</h1>
+<div class="card">
 
-<form method="POST" action="{{ url_for('group.joingroup') }}">
+<h1>Join Group</h1>
 
-    <label for="group_id">Enter Group ID:</label>
-    <input 
-        type="number" 
-        id="group_id" 
-        name="group_id" 
-        required
-    >
+<form method="POST"
+      action="{{ url_for('group.joingroup') }}">
 
-    <br><br>
+    <label>Group ID</label>
 
-    <button type="submit">Join Group</button>
+    <input
+        type="number"
+        name="group_id"
+        required>
+
+    <button type="submit">
+        Join Group
+    </button>
 
 </form>
+
+</div>
 
 {% endblock %}

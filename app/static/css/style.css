@@ -1,14 +1,189 @@
-body {
-    font-family: Arial;
-    width: 500px;
-    margin: 40px auto;
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
 }
 
-input {
-    width: 100%;
-    padding: 10px;
+body{
+    font-family:Arial,Helvetica,sans-serif;
+    background:#f4f6f8;
+    color:#333;
 }
 
-button {
-    padding: 10px 20px;
+.navbar{
+    background:#1abc9c;
+    color:white;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:18px 50px;
+}
+
+.logo a{
+    color:white;
+    text-decoration:none;
+    font-size:28px;
+    font-weight:bold;
+}
+
+.logout-btn{
+    color:white;
+    text-decoration:none;
+    font-weight:bold;
+}
+
+.container{
+    width:90%;
+    max-width:900px;
+    margin:40px auto;
+}
+
+.card{
+    background:white;
+    border-radius:12px;
+    padding:30px;
+    box-shadow:0 8px 25px rgba(0,0,0,.08);
+}
+
+.auth-card{
+    max-width:420px;
+    margin:auto;
+}
+
+h1,h2{
+    margin-bottom:20px;
+}
+
+.welcome{
+    margin-bottom:30px;
+}
+
+.group-list{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+    gap:18px;
+    margin-top:20px;
+    margin-bottom:30px;
+}
+
+.group-card{
+    background:#1abc9c;
+    color:white;
+    text-decoration:none;
+    padding:20px;
+    border-radius:10px;
+    text-align:center;
+    font-weight:bold;
+    transition:.3s;
+}
+
+.group-card:hover{
+    background:#16a085;
+    transform:translateY(-3px);
+}
+
+.button-row{
+    display:flex;
+    gap:15px;
+    flex-wrap:wrap;
+}
+
+.btn{
+    text-decoration:none;
+    padding:12px 20px;
+    border-radius:8px;
+    background:#ddd;
+    color:#222;
+    font-weight:bold;
+}
+
+.btn-primary{
+    background:#1abc9c;
+    color:white;
+}
+
+.btn:hover{
+    opacity:.9;
+}
+
+form{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+}
+
+input{
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    font-size:16px;
+}
+
+input:focus{
+    outline:none;
+    border-color:#1abc9c;
+}
+
+button{
+    padding:12px;
+    border:none;
+    border-radius:8px;
+    background:#1abc9c;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+    transition:.3s;
+}
+
+button:hover{
+    background:#16a085;
+}
+
+label{
+    font-weight:bold;
+}
+
+details{
+    margin-top:20px;
+}
+
+summary{
+    cursor:pointer;
+    font-weight:bold;
+    margin-bottom:15px;
+}
+
+.member-list{
+    margin-top:15px;
+    padding-left:20px;
+}
+
+.member-list li{
+    margin:10px 0;
+}
+
+p a{
+    color:#1abc9c;
+    text-decoration:none;
+    font-weight:bold;
+}
+
+p a:hover{
+    text-decoration:underline;
+}
+
+@media(max-width:700px){
+
+    .navbar{
+        padding:20px;
+    }
+
+    .container{
+        width:95%;
+    }
+
+    .button-row{
+        flex-direction:column;
+    }
+
 }
