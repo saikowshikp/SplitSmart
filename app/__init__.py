@@ -8,6 +8,7 @@ from .extensions import migrate
 
 from .routes.auth import auth_bp
 from .routes.dashboard import dashboard_bp
+from .routes.group import group_bp
 
 
 def create_app():
@@ -23,8 +24,7 @@ def create_app():
     login_manager.init_app(app)
 
     app.register_blueprint(auth_bp)
-
     app.register_blueprint(dashboard_bp)
-
+    app.register_blueprint(group_bp)
 
     return app

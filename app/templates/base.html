@@ -7,6 +7,9 @@
 </head>
 
 <body>
+    {% if user != None and user.is_authenticated %}
+        <a href="/logout">Logout</a>
+    {% endif %}
     {% block content %}
 
     {% endblock %}

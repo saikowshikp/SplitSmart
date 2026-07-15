@@ -33,7 +33,8 @@ def login():
 
         return "Invalid Credentials"
 
-    return render_template("login.html")
+    return render_template("login.html",
+                           user = None)
 
 
 @auth_bp.route("/register", methods=["GET", "POST"])
@@ -52,7 +53,8 @@ def register():
 
         return redirect(url_for("auth.login"))
 
-    return render_template("register.html")
+    return render_template("register.html",
+                           user = None)
 
 
 @auth_bp.route("/logout")
