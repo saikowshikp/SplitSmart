@@ -2,161 +2,166 @@
 
 {% block content %}
 
-<h2>Add Expense</h2>
+<div class="card">
 
-<form method="POST">
+    <h1>Add Expense</h1>
 
-    <label>Title</label>
+    <form method="POST" id="expense-form">
 
-    <br>
+        <label>Title</label>
+        <input
+            type="text"
+            name="title"
+            required>
 
-    <input
-        type="text"
-        name="title"
-        required>
+        <label>Description</label>
+        <textarea
+            name="description"
+            rows="3"
+            placeholder="Optional"></textarea>
 
-    <br><br>
+        <label>Paid By</label>
+        <select name="payer">
+            {% for member in members %}
+            <option value="{{ member.id }}">
+                {{ member.name }}
+            </option>
+            {% endfor %}
+        </select>
 
-    <label>Description</label>
-
-    <br>
-
-    <textarea
-        name="description"
-        rows="3"></textarea>
-
-    <br><br>
-
-    <label>Paid By</label>
-
-    <br>
-
-    <select name="payer">
-
-        {% for member in members %}
-
-        <option value="{{ member.id }}">
-
-            {{ member.name }}
-
-        </option>
-
-        {% endfor %}
-
-    </select>
-
-    <br><br>
-
-    <label>Total Amount</label>
-
-    <br>
-
-    <input
-        type="number"
-        step="0.01"
-        name="amount"
-        id="amount"
-        required>
-
-    <br><br>
-
-    <h3>Split Between</h3>
-
-    {% for member in members %}
-
-    <input
-        type="checkbox"
-        name="members"
-        value="{{ member.id }}"
-        class="member-checkbox"
-        checked>
-
-    {{ member.name }}
-
-    <div
-        class="share-input"
-        id="share_div_{{ member.id }}">
-
-        Share:
-
+        <label>Total Amount (₹)</label>
         <input
             type="number"
             step="0.01"
-            name="share_{{ member.id }}"
-            value="0">
+            name="amount"
+            id="amount"
+            required>
 
-    </div>
+        <h2>Split Between</h2>
 
-    <br>
+        <div class="member-container">
 
-    {% endfor %}
+        {% for member in members %}
 
-    <p id="error" style="color:red;"></p>
+            <div class="member-card">
 
-    <button type="submit">
+                <label class="member-header">
 
-        Add Expense
+                    <input
+                        type="checkbox"
+                        name="members"
+                        value="{{ member.id }}"
+                        class="member-checkbox"
+                        checked>
 
-    </button>
+                    <span>{{ member.name }}</span>
 
-</form>
+                </label>
+
+                <div
+                    class="share-input"
+                    id="share_div_{{ member.id }}">
+
+                    <label>Share (₹)</label>
+
+                    <input
+                        type="number"
+                        step="0.01"
+                        name="share_{{ member.id }}"
+                        value="0">
+
+                </div>
+
+            </div>
+
+        {% endfor %}
+
+        </div>
+
+        <p id="error" class="error-msg"></p>
+
+        <button type="submit">
+            Add Expense
+        </button>
+
+    </form>
+
+</div>
 
 <script>
 
 const amountBox = document.getElementById("amount");
-
-const form = document.querySelector("form");
-
+const form = document.getElementById("expense-form");
 const error = document.getElementById("error");
 
 const checkboxes =
 document.querySelectorAll(".member-checkbox");
 
-checkboxes.forEach(cb => {
+checkboxes.forEach(cb=>{
 
-    cb.addEventListener("change", () => {
+    cb.addEventListener("change",()=>{
 
-        let div =
+        const div =
         document.getElementById(
-            "share_div_" + cb.value
+            "share_div_"+cb.value
         );
 
         div.style.display =
-            cb.checked ? "block" : "none";
+            cb.checked ? "block":"none";
 
     });
 
 });
 
-form.addEventListener("submit", function(e){
+form.addEventListener("submit",function(e){
 
     let total = 0;
+    let selected = 0;
 
-    document
-        .querySelectorAll(".member-checkbox")
-        .forEach(cb=>{
+    checkboxes.forEach(cb=>{
 
-            if(cb.checked){
+        if(cb.checked){
 
-                total += parseFloat(
-                    document.getElementsByName(
-                        "share_"+cb.value
-                    )[0].value
-                );
+            selected++;
 
-            }
+            total += parseFloat(
+                document.getElementsByName(
+                    "share_"+cb.value
+                )[0].value || 0
+            );
 
-        });
+        }
 
-    let amount =
-    parseFloat(amountBox.value);
+    });
+
+    const amount =
+    parseFloat(amountBox.value || 0);
+
+    error.innerHTML="";
+
+    if(amount<=0){
+
+        e.preventDefault();
+        error.innerHTML =
+        "Amount must be greater than 0.";
+        return;
+
+    }
+
+    if(selected===0){
+
+        e.preventDefault();
+        error.innerHTML =
+        "Select at least one member.";
+        return;
+
+    }
 
     if(Math.abs(total-amount)>0.01){
 
         e.preventDefault();
-
         error.innerHTML =
-        "Shares do not add up to total amount.";
+        "Shares do not add up to the total amount.";
 
     }
 

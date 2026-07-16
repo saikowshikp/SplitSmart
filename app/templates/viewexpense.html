@@ -2,40 +2,104 @@
 
 {% block content %}
 
-<h1>Expense Details</h1>
-<h2>{{ expense.group.name }}</h2>
-<h3>{{ expense.description }}</h3>
+<div class="card">
 
-<p><strong>Amount:</strong> ₹{{ expense.total_amount }}</p>
+    <h1>{{ expense.title }}</h1>
 
-<p><strong>Paid By:</strong> {{ expense.payer.name }}</p>
+    <h3>{{ expense.group.name }}</h3>
 
-<p><strong>Date:</strong> {{ expense.created_at.strftime("%d %b %Y %H:%M") }}</p>
+    {% if expense.description %}
+    <p class="expense-description">
+        {{ expense.description }}
+    </p>
+    {% endif %}
 
-<h3>Shares</h3>
+    <div class="expense-info">
 
-{% if shares %}
-<table border="1" cellpadding="5">
-    <tr>
-        <th>Member</th>
-        <th>Amount Owed</th>
-    </tr>
+        <div class="info-box">
 
-    {% for share in shares %}
-    <tr>
-        <td>{{ share.user.name }}</td>
-        <td>₹{{ "%.2f"|format(share.amount_owed) }}</td>
-    </tr>
-    {% endfor %}
-</table>
-{% else %}
-<p>No shares available.</p>
-{% endif %}
+            <h4>Total Amount</h4>
 
-<p>
-    <a href="{{ url_for('group.group', groupid=expense.group.id) }}">
-        Back to Group
-    </a>
-</p>
+            <p>
+                ₹{{ "%.2f"|format(expense.total_amount) }}
+            </p>
+
+        </div>
+
+        <div class="info-box">
+
+            <h4>Paid By</h4>
+
+            <p>{{ expense.payer.name }}</p>
+
+        </div>
+
+        <div class="info-box">
+
+            <h4>Date</h4>
+
+            <p>
+                {{ expense.created_at.strftime("%d %b %Y %H:%M") }}
+            </p>
+
+        </div>
+
+    </div>
+
+    <h2>Expense Split</h2>
+
+    {% if shares %}
+
+    <table class="balance-table">
+
+        <thead>
+
+            <tr>
+
+                <th>Member</th>
+                <th>Amount Owed</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+        {% for share in shares %}
+
+            <tr>
+
+                <td>{{ share.user.name }}</td>
+
+                <td>
+                    ₹{{ "%.2f"|format(share.amount_owed) }}
+                </td>
+
+            </tr>
+
+        {% endfor %}
+
+        </tbody>
+
+    </table>
+
+    {% else %}
+
+    <p>No shares available.</p>
+
+    {% endif %}
+
+    <div class="button-row">
+
+        <a class="btn"
+           href="{{ url_for('group.group', groupid=expense.group.id) }}">
+
+            ← Back to Group
+
+        </a>
+
+    </div>
+
+</div>
 
 {% endblock %}

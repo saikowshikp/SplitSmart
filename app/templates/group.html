@@ -4,78 +4,117 @@
 
 <div class="card">
 
-<h1>{{ group.name }}</h1>
+    <div class="group-header">
 
-<details>
+        <div>
 
-    <summary>
-        Show Group Members
-    </summary>
+            <h1>{{ group.name }}</h1>
 
-    <ul class="member-list">
+            <div class="group-actions">
 
-    {% for member in group.members %}
+                <a class="btn"
+                href="{{ url_for('dashboard.dashboard') }}">
+                    ← Dashboard
+                </a>
 
-        <li>
+                <a class="btn btn-primary"
+                href="{{ url_for('expense.checkbalances', groupid=group.id) }}">
+                    Check Balances
+                </a>
 
-            {% if member.user.id == group.created_by %}
+            </div>
 
-                <strong>{{ member.user.name }} 👑</strong>
+        </div>
 
-            {% else %}
+        <a class="btn"
+        href="{{ url_for('expense.addexpense', groupid=group.id) }}">
+            + Add Expense
+        </a>
 
-                {{ member.user.name }}
+    </div>
 
-            {% endif %}
+    <details>
 
-        </li>
+        <summary>Show Group Members</summary>
 
-    {% endfor %}
+        <ul class="member-list">
 
-    </ul>
+        {% for member in group.members %}
 
-</details>
+            <li>
 
-<a href="{{ url_for('expense.checkbalances', groupid=group.id) }}">Check Balances</a>
+                {% if member.user.id == group.created_by %}
+
+                    <strong>{{ member.user.name }} 👑</strong>
+
+                {% else %}
+
+                    {{ member.user.name }}
+
+                {% endif %}
+
+            </li>
+
+        {% endfor %}
+
+        </ul>
+
+    </details>
 
 <h2>Expenses</h2>
 
 {% if group.expenses %}
-<table class="expense-table">
-    <thead>
-        <tr>
-            <th>Title</th>
-            <th>Amount</th>
-            <th>Paid By</th>
-            <th>Date</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for expense in group.expenses %}
-        <tr>
-            <td>{{ expense.title }}</td>
-            <td>₹{{ "%.2f"|format(expense.total_amount) }}</td>
-            <td>{{ expense.payer.name }}</td>
-            <td>{{ expense.created_at.strftime("%d %b %Y") }}</td>
-            <td><a href="{{ url_for('expense.viewexpense', expense_id = expense.id)}}">&rarr;</a></td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% else %}
-<p>No expenses have been added yet.</p>
-{% endif %}
+
+<div class="expense-cards">
+
+{% for expense in group.expenses %}
+
+    <div class="expense-card">
+
+        <div class="expense-card-header">
+
+            <h3>{{ expense.title }}</h3>
+
+            <span class="expense-amount">
+                ₹{{ "%.2f"|format(expense.total_amount) }}
+            </span>
+
+        </div>
 
 
-<div class="button-row">
+        <div class="expense-details">
 
-    <a class="btn"
-        href="{{ url_for('expense.addexpense', groupid=group.id)}}">
-        Add Expense
-    </a>
+            <p>
+                <strong>Paid by:</strong>
+                {{ expense.payer.name }}
+            </p>
+
+            <p>
+                <strong>Date:</strong>
+                {{ expense.created_at.strftime("%d %b %Y") }}
+            </p>
+
+        </div>
+
+
+        <a class="expense-link"
+           href="{{ url_for('expense.viewexpense', expense_id=expense.id) }}">
+            View Details →
+        </a>
+
+    </div>
+
+{% endfor %}
 
 </div>
+
+{% else %}
+
+<p class="empty-state">
+    No expenses have been added yet.
+</p>
+
+{% endif %}
 
 </div>
 

@@ -2,34 +2,73 @@
 
 {% block content %}
 
-<h1>Balances - {{ group.name }}</h1>
+<div class="card">
 
-<table border="1" cellpadding="5">
-    <tr>
-        <th>Member</th>
-        <th>Balance</th>
-    </tr>
+    <h1>Balances</h1>
 
-    {% for member in group.members %}
-    <tr>
-        <td>{{ member.user.name }}</td>
-        <td>
-            {% if balances[member.user.id] > 0 %}
-                Gets back ₹{{ "%.2f"|format(balances[member.user.id]) }}
-            {% elif balances[member.user.id] < 0 %}
-                Owes ₹{{ "%.2f"|format(-balances[member.user.id]) }}
-            {% else %}
-                Settled up
-            {% endif %}
-        </td>
-    </tr>
-    {% endfor %}
-</table>
+    <h3>{{ group.name }}</h3>
 
-<br>
+    <table class="balance-table">
 
-<a href="{{ url_for('group.group', groupid=group.id) }}">
-    Back to Group
-</a>
+        <thead>
+
+            <tr>
+                <th>Member</th>
+                <th>Status</th>
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+        {% for member in group.members %}
+
+            <tr>
+
+                <td>{{ member.user.name }}</td>
+
+                <td>
+
+                {% if balances[member.user.id] > 0 %}
+
+                    <span class="positive">
+                        Gets back ₹{{ "%.2f"|format(balances[member.user.id]) }}
+                    </span>
+
+                {% elif balances[member.user.id] < 0 %}
+
+                    <span class="negative">
+                        Owes ₹{{ "%.2f"|format(-balances[member.user.id]) }}
+                    </span>
+
+                {% else %}
+
+                    <span class="neutral">
+                        Settled Up
+                    </span>
+
+                {% endif %}
+
+                </td>
+
+            </tr>
+
+        {% endfor %}
+
+        </tbody>
+
+    </table>
+
+    <div class="button-row">
+
+        <a
+            class="btn"
+            href="{{ url_for('group.group', groupid=group.id) }}">
+            ← Back to Group
+        </a>
+
+    </div>
+
+</div>
 
 {% endblock %}
