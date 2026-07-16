@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Add Expense</h2>
+
+<form method="POST">
+
+    <label>Title</label>
+
+    <br>
+
+    <input
+        type="text"
+        name="title"
+        required>
+
+    <br><br>
+
+    <label>Description</label>
+
+    <br>
+
+    <textarea
+        name="description"
+        rows="3"></textarea>
+
+    <br><br>
+
+    <label>Paid By</label>
+
+    <br>
+
+    <select name="payer">
+
+        {% for member in members %}
+
+        <option value="{{ member.id }}">
+
+            {{ member.name }}
+
+        </option>
+
+        {% endfor %}
+
+    </select>
+
+    <br><br>
+
+    <label>Total Amount</label>
+
+    <br>
+
+    <input
+        type="number"
+        step="0.01"
+        name="amount"
+        id="amount"
+        required>
+
+    <br><br>
+
+    <h3>Split Between</h3>
+
+    {% for member in members %}
+
+    <input
+        type="checkbox"
+        name="members"
+        value="{{ member.id }}"
+        class="member-checkbox"
+        checked>
+
+    {{ member.name }}
+
+    <div
+        class="share-input"
+        id="share_div_{{ member.id }}">
+
+        Share:
+
+        <input
+            type="number"
+            step="0.01"
+            name="share_{{ member.id }}"
+            value="0">
+
+    </div>
+
+    <br>
+
+    {% endfor %}
+
+    <p id="error" style="color:red;"></p>
+
+    <button type="submit">
+
+        Add Expense
+
+    </button>
+
+</form>
+
+<script>
+
+const amountBox = document.getElementById("amount");
+
+const form = document.querySelector("form");
+
+const error = document.getElementById("error");
+
+const checkboxes =
+document.querySelectorAll(".member-checkbox");
+
+checkboxes.forEach(cb => {
+
+    cb.addEventListener("change", () => {
+
+        let div =
+        document.getElementById(
+            "share_div_" + cb.value
+        );
+
+        div.style.display =
+            cb.checked ? "block" : "none";
+
+    });
+
+});
+
+form.addEventListener("submit", function(e){
+
+    let total = 0;
+
+    document
+        .querySelectorAll(".member-checkbox")
+        .forEach(cb=>{
+
+            if(cb.checked){
+
+                total += parseFloat(
+                    document.getElementsByName(
+                        "share_"+cb.value
+                    )[0].value
+                );
+
+            }
+
+        });
+
+    let amount =
+    parseFloat(amountBox.value);
+
+    if(Math.abs(total-amount)>0.01){
+
+        e.preventDefault();
+
+        error.innerHTML =
+        "Shares do not add up to total amount.";
+
+    }
+
+});
+
+</script>
+
+{% endblock %}

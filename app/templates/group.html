@@ -36,6 +36,47 @@
 
 </details>
 
+<a href="{{ url_for('expense.checkbalances', groupid=group.id) }}">Check Balances</a>
+
+<h2>Expenses</h2>
+
+{% if group.expenses %}
+<table class="expense-table">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Amount</th>
+            <th>Paid By</th>
+            <th>Date</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for expense in group.expenses %}
+        <tr>
+            <td>{{ expense.title }}</td>
+            <td>₹{{ "%.2f"|format(expense.total_amount) }}</td>
+            <td>{{ expense.payer.name }}</td>
+            <td>{{ expense.created_at.strftime("%d %b %Y") }}</td>
+            <td><a href="{{ url_for('expense.viewexpense', expense_id = expense.id)}}">&rarr;</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No expenses have been added yet.</p>
+{% endif %}
+
+
+<div class="button-row">
+
+    <a class="btn"
+        href="{{ url_for('expense.addexpense', groupid=group.id)}}">
+        Add Expense
+    </a>
+
+</div>
+
 </div>
 
 {% endblock %}

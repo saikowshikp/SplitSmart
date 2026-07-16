@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Balances - {{ group.name }}</h1>
+
+<table border="1" cellpadding="5">
+    <tr>
+        <th>Member</th>
+        <th>Balance</th>
+    </tr>
+
+    {% for member in group.members %}
+    <tr>
+        <td>{{ member.user.name }}</td>
+        <td>
+            {% if balances[member.user.id] > 0 %}
+                Gets back ₹{{ "%.2f"|format(balances[member.user.id]) }}
+            {% elif balances[member.user.id] < 0 %}
+                Owes ₹{{ "%.2f"|format(-balances[member.user.id]) }}
+            {% else %}
+                Settled up
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+<br>
+
+<a href="{{ url_for('group.group', groupid=group.id) }}">
+    Back to Group
+</a>
+
+{% endblock %}

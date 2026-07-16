@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>Expense Details</h1>
+<h2>{{ expense.group.name }}</h2>
+<h3>{{ expense.description }}</h3>
+
+<p><strong>Amount:</strong> ₹{{ expense.total_amount }}</p>
+
+<p><strong>Paid By:</strong> {{ expense.payer.name }}</p>
+
+<p><strong>Date:</strong> {{ expense.created_at.strftime("%d %b %Y %H:%M") }}</p>
+
+<h3>Shares</h3>
+
+{% if shares %}
+<table border="1" cellpadding="5">
+    <tr>
+        <th>Member</th>
+        <th>Amount Owed</th>
+    </tr>
+
+    {% for share in shares %}
+    <tr>
+        <td>{{ share.user.name }}</td>
+        <td>₹{{ "%.2f"|format(share.amount_owed) }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>No shares available.</p>
+{% endif %}
+
+<p>
+    <a href="{{ url_for('group.group', groupid=expense.group.id) }}">
+        Back to Group
+    </a>
+</p>
+
+{% endblock %}
