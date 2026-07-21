@@ -7,16 +7,16 @@
     <h1>Dashboard</h1>
 
     <p class="welcome">
-        Welcome, <strong>{{ user.name }}</strong>
+        Welcome, <strong>{{ current_user.name }}</strong>
     </p>
 
     <h2>Your Groups</h2>
 
-    {% if user.group_memberships %}
+    {% if current_user.group_memberships %}
 
     <div class="group-list">
 
-        {% for membership in user.group_memberships %}
+        {% for membership in current_user.group_memberships %}
 
         <a class="group-card"
            href="{{ url_for('group.group', groupid=membership.group.id) }}">

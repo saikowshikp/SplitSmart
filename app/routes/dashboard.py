@@ -12,6 +12,5 @@ dashboard_bp = Blueprint("dashboard", __name__)
 def dashboard():
 
     return render_template(
-        "dashboard.html",
-        user=current_user
+        "dashboard.html"
     )

@@ -82,3 +82,11 @@ class Expense(db.Model):
         db.session.delete(expense)
         db.session.commit()
         return True
+    
+    @staticmethod
+    def commit():
+        db.session.commit()
+    
+    @staticmethod
+    def rollback():
+        db.session.rollback()

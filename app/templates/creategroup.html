@@ -4,23 +4,35 @@
 
 <div class="card">
 
-<h1>Create Group</h1>
+    <h1>Create Group</h1>
 
-<form method="POST"
-      action="{{ url_for('group.creategroup') }}">
+    <form method="POST"
+          action="{{ url_for('group.creategroup') }}">
 
-    <label>Group Name</label>
+        {{ form.hidden_tag() }}
 
-    <input
-        type="text"
-        name="groupname"
-        required>
+        <div>
 
-    <button type="submit">
-        Create Group
-    </button>
+            {{ form.group_name.label }}
 
-</form>
+            {{ form.group_name(
+                class="form-control",
+                placeholder="Enter Group Name"
+            ) }}
+
+            {% for error in form.group_name.errors %}
+                <p class="error">
+                    {{ error }}
+                </p>
+            {% endfor %}
+
+        </div>
+
+        <button type="submit">
+            {{ form.submit.label.text }}
+        </button>
+
+    </form>
 
 </div>
 

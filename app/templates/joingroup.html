@@ -4,23 +4,35 @@
 
 <div class="card">
 
-<h1>Join Group</h1>
+    <h1>Join Group</h1>
 
-<form method="POST"
-      action="{{ url_for('group.joingroup') }}">
+    <form method="POST"
+          action="{{ url_for('group.joingroup') }}">
 
-    <label>Group ID</label>
+        {{ form.hidden_tag() }}
 
-    <input
-        type="number"
-        name="group_id"
-        required>
+        <div>
 
-    <button type="submit">
-        Join Group
-    </button>
+            {{ form.group_id.label }}
 
-</form>
+            {{ form.group_id(
+                class="form-control",
+                placeholder="Enter Group ID"
+            ) }}
+
+            {% for error in form.group_id.errors %}
+                <p class="error">
+                    {{ error }}
+                </p>
+            {% endfor %}
+
+        </div>
+
+        <button type="submit">
+            {{ form.submit.label.text }}
+        </button>
+
+    </form>
 
 </div>
 

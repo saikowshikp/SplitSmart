@@ -31,6 +31,11 @@ class ExpenseShare(db.Model):
         back_populates="expense_shares"
     )
 
+    @classmethod
+    def delete_by_expense(cls, expense_id):
+        cls.query.filter_by(expense_id = expense_id).delete()
+
+
     def add_expenseshares(shares, expense_id):
         for member_id, share in shares:
 
