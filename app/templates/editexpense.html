@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card">
+
+    <h1>Edit Expense</h1>
+
+    <form method="POST" id="expense-form">
+
+
+        <label>Title</label>
+
+        <input
+            type="text"
+            name="title"
+            value="{{ expense.title }}"
+            required>
+
+
+        <label>Description</label>
+
+        <textarea
+            name="description"
+            rows="3"
+            placeholder="Optional">{{ expense.description or "" }}</textarea>
+
+
+        <label>Paid By</label>
+
+        <select name="payer">
+
+            {% for member in members %}
+
+            <option
+                value="{{ member.id }}"
+                {% if member.id == expense.paid_by %}
+                    selected
+                {% endif %}
+            >
+
+                {{ member.name }}
+
+            </option>
+
+            {% endfor %}
+
+        </select>
+
+
+        <label>Total Amount (₹)</label>
+
+        <input
+            type="number"
+            step="0.01"
+            name="amount"
+            id="amount"
+            value="{{ expense.total_amount }}"
+            required>
+
+
+        <h2>Split Between</h2>
+
+
+        <div class="member-container">
+
+
+        {% for member in members %}
+
+
+            {% set share_amount = 0 %}
+
+            {% for share in shares %}
+
+                {% if share.user_id == member.id %}
+
+                    {% set share_amount = share.amount_owed %}
+
+                {% endif %}
+
+            {% endfor %}
+
+
+
+            <div class="member-card">
+
+
+                <label class="member-header">
+
+
+                    <input
+                        type="checkbox"
+                        name="members"
+                        value="{{ member.id }}"
+                        class="member-checkbox"
+
+                        {% if share_amount > 0 %}
+                            checked
+                        {% endif %}
+                    >
+
+
+                    <span>{{ member.name }}</span>
+
+
+                </label>
+
+
+
+                <div
+                    class="share-input"
+                    id="share_div_{{ member.id }}"
+
+                    {% if share_amount == 0 %}
+                        style="display:none;"
+                    {% endif %}
+                >
+
+
+                    <label>
+                        Share (₹)
+                    </label>
+
+
+                    <input
+                        type="number"
+                        step="0.01"
+                        name="share_{{ member.id }}"
+                        value="{{ share_amount }}">
+
+
+                </div>
+
+
+            </div>
+
+
+        {% endfor %}
+
+
+        </div>
+
+
+
+        <p id="error" class="error-msg"></p>
+
+
+        <button type="submit">
+
+            Save Changes
+
+        </button>
+
+
+    </form>
+
+
+</div>
+
+
+
+<script>
+
+
+const amountBox =
+document.getElementById("amount");
+
+
+const form =
+document.getElementById("expense-form");
+
+
+const error =
+document.getElementById("error");
+
+
+
+const checkboxes =
+document.querySelectorAll(".member-checkbox");
+
+
+
+checkboxes.forEach(cb=>{
+
+
+    cb.addEventListener("change",()=>{
+
+
+        const div =
+        document.getElementById(
+            "share_div_"+cb.value
+        );
+
+
+        div.style.display =
+            cb.checked ? "block":"none";
+
+
+    });
+
+
+});
+
+
+
+form.addEventListener("submit",function(e){
+
+
+    let total = 0;
+
+    let selected = 0;
+
+
+    checkboxes.forEach(cb=>{
+
+
+        if(cb.checked){
+
+
+            selected++;
+
+
+            total += parseFloat(
+
+                document.getElementsByName(
+                    "share_"+cb.value
+                )[0].value || 0
+
+            );
+
+
+        }
+
+
+    });
+
+
+
+    const amount =
+    parseFloat(amountBox.value || 0);
+
+
+
+    error.innerHTML="";
+
+
+
+    if(amount <= 0){
+
+
+        e.preventDefault();
+
+
+        error.innerHTML =
+        "Amount must be greater than 0.";
+
+
+        return;
+
+
+    }
+
+
+
+    if(selected === 0){
+
+
+        e.preventDefault();
+
+
+        error.innerHTML =
+        "Select at least one member.";
+
+
+        return;
+
+
+    }
+
+
+
+    if(Math.abs(total-amount)>0.01){
+
+
+        e.preventDefault();
+
+
+        error.innerHTML =
+        "Shares do not add up to the total amount.";
+
+
+        return;
+
+
+    }
+
+
+
+});
+
+
+</script>
+
+
+{% endblock %}

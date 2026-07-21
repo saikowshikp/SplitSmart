@@ -7,7 +7,6 @@ from flask import url_for
 from flask_login import login_user
 from flask_login import logout_user
 
-from app.extensions import db
 from app.models.user import User
 
 auth_bp = Blueprint("auth", __name__)
@@ -16,6 +15,7 @@ auth_bp = Blueprint("auth", __name__)
 @auth_bp.route("/")
 def home():
     return redirect(url_for("auth.login"))
+
 
 
 @auth_bp.route("/login", methods=["GET", "POST"])

@@ -84,6 +84,78 @@ def addexpense(groupid):
         members=members
     )
 
+
+@expense_bp.route("/editexpense/<int:expenseid>", methods={"POST", "GET"})
+@login_required
+def editexpense(expenseid):
+    expense = Expense.get_expense_by_id(expenseid)
+    groupid = expense.group_id
+    group = expense.group
+    groupmembers = [groupmember.user for groupmember in  group.members]
+    if request.method == "POST":
+
+        title = request.form["title"]
+        description = request.form["description"]
+        payer_id = int(request.form["payer"])
+        amount = float(request.form["amount"])
+        selected_members = request.form.getlist("members")
+
+        if len(selected_members) == 0:
+            return "Select at least one member."
+
+        total_share = 0
+
+        shares = []
+
+        for member_id in selected_members:
+            share = float(request.form[f"share_{member_id}"])
+            total_share += share
+            shares.append(
+                (
+                    int(member_id),
+                    share
+                )
+            )
+
+        if abs(total_share - amount) > 0.01:
+            return "Sum of shares must equal total amount."
+
+        expense_id = Expense.add_expense_without_commit(
+            group_id=groupid,
+            paid_by=payer_id,
+            title=title,
+            description=description,
+            total_amount=amount
+        )
+
+        ExpenseShare.add_expenseshares(shares=shares, expense_id=expense_id)
+        Expense.delete_expense(expense.id)
+
+        return redirect(
+            url_for(
+                "group.group",
+                groupid=groupid
+            )
+        )
+
+    return render_template("editexpense.html",
+                    user = current_user,
+                    expense = expense,
+                    members = groupmembers
+                    )
+
+
+@expense_bp.route("/deleteexpense/<int:expenseid>")
+@login_required
+def deleteexpense(expenseid):
+    expense = Expense.get_expense_by_id(expenseid)
+    if current_user.id in [groupmember.user.id for groupmember in expense.group.members]:
+        Expense.delete_expense(expenseid)
+    else:
+        return "You do not have access to delte this expense"
+
+    return redirect(url_for("group.group", groupid = expense.group_id))
+
 @expense_bp.route("/checkbalances/<int:groupid>")
 @login_required
 def checkbalances(groupid):

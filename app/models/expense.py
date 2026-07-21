@@ -10,7 +10,8 @@ class Expense(db.Model):
 
     group_id = db.Column(
         db.Integer,
-        db.ForeignKey("groups.id"),
+        db.ForeignKey("groups.id",
+                      ondelete="CASCADE"),
         nullable=False
     )
 
@@ -72,3 +73,12 @@ class Expense(db.Model):
         db.session.add(newExpense)
         db.session.flush()
         return newExpense.id
+    
+    @staticmethod
+    def delete_expense(id):
+        expense = Expense.query.get(id)
+        if expense is None:
+            return False
+        db.session.delete(expense)
+        db.session.commit()
+        return True

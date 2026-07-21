@@ -6,13 +6,13 @@ class ExpenseShare(db.Model):
 
     expense_id = db.Column(
         db.Integer,
-        db.ForeignKey("expenses.id"),
+        db.ForeignKey("expenses.id", ondelete="CASCADE"),
         primary_key=True
     )
 
     user_id = db.Column(
         db.Integer,
-        db.ForeignKey("users.id"),
+        db.ForeignKey("users.id", ondelete="CASCADE"),
         primary_key=True
     )
 

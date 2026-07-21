@@ -97,8 +97,23 @@
             ← Back to Group
 
         </a>
+        
+        <a class="btn"
+            href="{{ url_for('expense.editexpense', expenseid = expense.id) }}">
+
+            Edit Expense
+
+        </a>
+
+        <a class="btn" style="background-color: red; color: white"
+            href="{{ url_for('expense.deleteexpense', expenseid = expense.id) }}">
+    
+            Delete Expense
+
+        </a>
 
     </div>
+    
 
 </div>
 
