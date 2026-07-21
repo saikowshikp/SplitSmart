@@ -43,13 +43,19 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
     
-    @staticmethod
-    def add_user(name, email, password):
+    @classmethod
+    def get_by_email(cls, email):
+        return cls.query.filter_by(email=email).first()
+
+    @classmethod
+    def add_user(cls, name, email, password):
         user = User(name=name, email=email)
         user.set_password(password)
         
         db.session.add(user)
         db.session.commit()
+
+        return user
     
 
 

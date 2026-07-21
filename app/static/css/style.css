@@ -452,3 +452,34 @@ select:focus{
     color: #2563eb;
     font-weight: 600;
 }
+
+.flash {
+    padding: 12px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    font-size: 15px;
+}
+
+
+.flash.success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+
+.flash.danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+
+.flash.warning {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+
+.flash.info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}

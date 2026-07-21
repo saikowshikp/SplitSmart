@@ -4,37 +4,70 @@
 
 <div class="card auth-card">
 
-<h2>Register</h2>
+    <h2>Register</h2>
 
-<form method="POST">
 
-    <input
-        name="name"
-        placeholder="Name"
-        required>
+    <form method="POST">
 
-    <input
-        type="email"
-        name="email"
-        placeholder="Email"
-        required>
+        {{ form.hidden_tag() }}
 
-    <input
-        type="password"
-        name="password"
-        placeholder="Password"
-        required>
 
-    <button type="submit">
-        Register
-    </button>
+        <div>
+            {{ form.name(
+                class="form-control",
+                placeholder="Name"
+            ) }}
 
-</form>
+            {% for error in form.name.errors %}
+                <p class="error">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </div>
 
-<p>
-    Already have an account?
-    <a href="/login">Login</a>
-</p>
+
+        <div>
+            {{ form.email(
+                class="form-control",
+                placeholder="Email"
+            ) }}
+
+            {% for error in form.email.errors %}
+                <p class="error">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </div>
+
+
+        <div>
+            {{ form.password(
+                class="form-control",
+                placeholder="Password"
+            ) }}
+
+            {% for error in form.password.errors %}
+                <p class="error">
+                    {{ error }}
+                </p>
+            {% endfor %}
+        </div>
+
+
+        <button type="submit">
+            {{ form.submit.label.text }}
+        </button>
+
+    </form>
+
+
+    <p>
+        Already have an account?
+        <a href="{{ url_for('auth.login') }}">
+            Login
+        </a>
+    </p>
+
 
 </div>
 

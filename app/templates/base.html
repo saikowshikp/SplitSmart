@@ -3,29 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>SplitSmart</title>
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/style.css') }}">
 </head>
+
 <body>
 
 <nav class="navbar">
+
     <div class="logo">
-        <a href="/">SplitSmart</a>
+        <a href="{{ url_for('dashboard.dashboard') }}">
+            SplitSmart
+        </a>
     </div>
 
-    {% if user != None and user.is_authenticated %}
+
+    {% if current_user.is_authenticated %}
+
     <div class="nav-links">
-        <a class="logout-btn" href="/logout">Logout</a>
+
+        <span>
+            {{ current_user.name }}
+        </span>
+
+        <a class="logout-btn"
+           href="{{ url_for('auth.logout') }}">
+            Logout
+        </a>
+
     </div>
+
     {% endif %}
+
 </nav>
 
+
 <div class="container">
+
+
+    <!-- Flash Messages -->
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+
+        {% if messages %}
+
+            {% for category, message in messages %}
+
+                <div class="flash {{ category }}">
+                    {{ message }}
+                </div>
+
+            {% endfor %}
+
+        {% endif %}
+
+    {% endwith %}
+
+
+
     {% block content %}
     {% endblock %}
+
+
 </div>
+
 
 </body>
 </html>

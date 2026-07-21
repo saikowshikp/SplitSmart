@@ -1,13 +1,9 @@
-from flask import Blueprint
-from flask import render_template
-from flask import request
-from flask import redirect
-from flask import url_for
+from flask import Blueprint, render_template, request, redirect, url_for, flash
 
-from flask_login import login_user
-from flask_login import logout_user
+from flask_login import current_user, logout_user
 
-from app.models.user import User
+from app.forms.auth_forms import LoginForm, RegisterForm
+from app.services.auth_service import AuthService
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -21,45 +17,74 @@ def home():
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
 
+    if current_user.is_authenticated:
+        return redirect(url_for("dashboard.dashboard"))
+
+    form = LoginForm()
+
     if request.method == "POST":
 
-        email = request.form["email"]
-        password = request.form["password"]
-        user = User.query.filter_by(email=email).first()
+        if form.validate_on_submit():
 
-        if user and user.check_password(password):
-            login_user(user)
-            return redirect(url_for("dashboard.dashboard"))
+            success, message = AuthService.login(
+                email=form.email.data.strip(),
+                password=form.password.data
+            )
 
-        return "Invalid Credentials"
+            if success:
 
-    return render_template("login.html",
-                           user = None)
+                flash("Welcome back!", "success")
+
+                return redirect(url_for("dashboard.dashboard"))
+
+            flash(message, "danger")
+
+    return render_template(
+        "login.html",
+        form=form,
+        user=None
+    )
 
 
 @auth_bp.route("/register", methods=["GET", "POST"])
 def register():
 
-    if request.method == "POST":
+    form = RegisterForm()
 
-        name = request.form["name"]
-        email = request.form["email"]
-        password = request.form["password"]
+    if form.validate_on_submit():
 
-        if User.query.filter_by(email=email).first():
-            return "Email already exists"
+        success, message = AuthService.register(
+            name=form.name.data.strip(),
+            email=form.email.data.strip(),
+            password=form.password.data
+        )
 
-        User.add_user(name, email, password)
+        if success:
 
-        return redirect(url_for("auth.login"))
+            flash(
+                "Account created successfully. Please login.",
+                "success"
+            )
 
-    return render_template("register.html",
-                           user = None)
+            return redirect(
+                url_for("auth.login")
+            )
+
+
+        flash(message, "danger")
+
+
+    return render_template(
+        "register.html",
+        form=form
+    )
 
 
 @auth_bp.route("/logout")
 def logout():
 
     logout_user()
+
+    flash("You have been logged out.", "info")
 
     return redirect(url_for("auth.login"))
