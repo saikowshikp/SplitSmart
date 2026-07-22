@@ -36,6 +36,18 @@ class User(UserMixin, db.Model):
         back_populates="user",
         cascade="all, delete-orphan"
     )
+
+    payments_made = db.relationship(
+        "Settlement",
+        foreign_keys="Settlement.payer_id",
+        back_populates="payer"
+    )
+
+    payments_received = db.relationship(
+        "Settlement",
+        foreign_keys="Settlement.receiver_id",
+        back_populates="receiver"
+    )
     
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

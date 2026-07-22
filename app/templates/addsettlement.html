@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card">
+
+    <h1>Record Settlement</h1>
+
+    <form
+        method="POST"
+        id="settlement-form">
+
+        <label>Payer</label>
+
+        <select
+            name="payer_id"
+            id="payer"
+            required>
+
+            <option value="">
+                Select Payer
+            </option>
+
+            {% for member in members %}
+
+            <option
+                value="{{ member.id }}"
+                {% if payer_id == member.id %}
+                    selected
+                {% endif %}
+            >
+
+                {{ member.name }}
+
+            </option>
+
+            {% endfor %}
+
+        </select>
+
+
+        <label>Receiver</label>
+
+        <select
+            name="receiver_id"
+            id="receiver"
+            required>
+
+            <option value="">
+                Select Receiver
+            </option>
+
+            {% for member in members %}
+
+            <option
+                value="{{ member.id }}"
+                {% if receiver_id == member.id %}
+                    selected
+                {% endif %}
+            >
+
+                {{ member.name }}
+
+            </option>
+
+            {% endfor %}
+
+        </select>
+
+
+        <label>Amount (₹)</label>
+
+        <input
+            type="number"
+            step="0.01"
+            min="0.01"
+            id="amount"
+            name="amount"
+            value="{{ amount or '' }}"
+            required>
+
+
+        <p
+            id="error"
+            class="error-msg">
+
+        </p>
+
+
+        <button type="submit">
+
+            Record Settlement
+
+        </button>
+
+    </form>
+
+
+    <div class="group-actions">
+
+        <a
+            class="btn"
+            href="{{ url_for(
+                'group.group',
+                groupid=group.id
+            ) }}">
+
+            ← Back to Group
+
+        </a>
+
+    </div>
+
+</div>
+
+
+<script>
+
+const form =
+document.getElementById(
+    "settlement-form"
+);
+
+const payer =
+document.getElementById(
+    "payer"
+);
+
+const receiver =
+document.getElementById(
+    "receiver"
+);
+
+const amount =
+document.getElementById(
+    "amount"
+);
+
+const error =
+document.getElementById(
+    "error"
+);
+
+
+form.addEventListener(
+"submit",
+function(e){
+
+    error.innerHTML = "";
+
+    if(
+        payer.value === receiver.value
+    ){
+
+        e.preventDefault();
+
+        error.innerHTML =
+        "Payer and receiver cannot be the same.";
+
+        return;
+
+    }
+
+    if(
+        parseFloat(amount.value) <= 0
+    ){
+
+        e.preventDefault();
+
+        error.innerHTML =
+        "Enter a valid amount.";
+
+    }
+
+});
+
+</script>
+
+{% endblock %}

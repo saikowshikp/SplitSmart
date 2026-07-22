@@ -7,6 +7,7 @@ from app.models.group import Group
 from app.models.expense import Expense
 
 from app.services.expense_service import ExpenseService
+from app.services.settlement_service import SettlementService
 
 expense_bp = Blueprint("expense", __name__)
 
@@ -237,9 +238,11 @@ def checkbalances(groupid):
         group
     )
 
+    simplified_payments = SettlementService.simplify_payments(balances)
 
     return render_template(
         "balances.html",
         group=group,
-        balances=balances
+        balances=balances,
+        simplified_payments=simplified_payments
     )

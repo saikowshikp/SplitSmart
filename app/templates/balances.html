@@ -13,38 +13,48 @@
         <thead>
 
             <tr>
+
                 <th>Member</th>
                 <th>Status</th>
+
             </tr>
 
         </thead>
 
         <tbody>
 
-        {% for member in group.members %}
+        {% for balance in balances %}
 
             <tr>
 
-                <td>{{ member.user.name }}</td>
+                <td>{{ balance.user_name }}</td>
 
                 <td>
 
-                {% if balances[member.user.id] > 0 %}
+                {% if balance.amount > 0 %}
 
                     <span class="positive">
-                        Gets back ₹{{ "%.2f"|format(balances[member.user.id]) }}
+
+                        Gets back
+                        ₹{{ "%.2f"|format(balance.amount) }}
+
                     </span>
 
-                {% elif balances[member.user.id] < 0 %}
+                {% elif balance.amount < 0 %}
 
                     <span class="negative">
-                        Owes ₹{{ "%.2f"|format(-balances[member.user.id]) }}
+
+                        Owes
+                        ₹{{ "%.2f"|format(-balance.amount) }}
+
                     </span>
 
                 {% else %}
 
                     <span class="neutral">
+
                         Settled Up
+
                     </span>
 
                 {% endif %}
@@ -59,15 +69,91 @@
 
     </table>
 
-    <div class="button-row">
 
-        <a
-            class="btn"
-            href="{{ url_for('group.group', groupid=group.id) }}">
-            ← Back to Group
-        </a>
+    
+    
+    <h2>Simplified Payments</h2>
+    
 
-    </div>
+    {% if simplified_payments %}
+    
+    <table class="balance-table">
+        
+        <thead>
+            
+            <tr>
+                
+                <th>Payer</th>
+                <th></th>
+                <th>Receiver</th>
+                <th>Amount</th>
+                <th></th>
+                
+            </tr>
+            
+        </thead>
+        
+        <tbody>
+            
+            {% for payment in simplified_payments %}
+            
+            <tr>
+                
+                <td>{{ payment.payer_name }}</td>
+                
+                <td>owes</td>
+                
+                <td>{{ payment.receiver_name }}</td>
+                
+                <td>
+                    
+                    ₹{{ "%.2f"|format(payment.amount) }}
+                    
+                </td>
+                
+                <td>
+                    
+                    <a
+                    class="btn btn-primary"
+                        href="{{ url_for(
+                            'settlement.settle',
+                            groupid=group.id,
+                            payer_id=payment.payer_id,
+                            receiver_id=payment.receiver_id,
+                            amount=payment.amount
+                        ) }}">
+
+                        Settle Up
+
+                    </a>
+
+                </td>
+
+            </tr>
+
+        {% endfor %}
+
+    </tbody>
+    
+</table>
+
+{% else %}
+
+<p>Everyone is settled up! 🎉</p>
+
+{% endif %}
+
+<div class="button-row">
+
+    <a
+        class="btn"
+        href="{{ url_for('group.group', groupid=group.id) }}">
+
+        ← Back to Group
+
+    </a>
+
+</div>
 
 </div>
 

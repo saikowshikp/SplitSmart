@@ -27,6 +27,10 @@ class ExpenseService:
 
         if len(shares) == 0:
             return False, "Select at least one member."
+        
+        for _, share_amount in shares:
+            if share_amount < 0:
+                return False, "Share amount cannot be negative"
 
 
         total_share = sum(
@@ -70,6 +74,11 @@ class ExpenseService:
 
         if len(shares) == 0:
             return False, "Select at least one member."
+        
+        for _, share_amount in shares:
+            if share_amount < 0:
+                return False, "Share amount cannot be negative"
+        
 
         total_share = sum(
             share_amount
@@ -123,21 +132,37 @@ class ExpenseService:
 
     @staticmethod
     def calculate_balances(group):
+        
+        balance_map = {
+            member.user.id: {
+                "user_id": member.user.id,
+                "user_name": member.user.name,
+                "amount": 0.0
+            }
+            for member in group.members
+        }
 
-        balances = {}
-
-        for member in group.members:
-            balances[member.user.id] = 0.0
-
-
+       
         for expense in group.expenses:
-
-            balances[expense.payer.id] += expense.total_amount
-
+            balance_map[expense.payer.id]["amount"] += float(expense.total_amount)
 
             for share in expense.shares:
+                balance_map[share.user_id]["amount"] -= float(share.amount_owed)
 
-                balances[share.user_id] -= share.amount_owed
+        for settlement in group.settlements:
+            balance_map[settlement.payer_id]["amount"] += float(settlement.amount)
+            balance_map[settlement.receiver_id]["amount"] -= float(settlement.amount)
 
+        
+        balances = list(balance_map.values())
+
+        # Optional: round amounts to 2 decimals and avoid -0.0
+        for item in balances:
+            item["amount"] = round(item["amount"], 2)
+            if abs(item["amount"]) < 0.005:
+                item["amount"] = 0.0
+
+        
+        balances.sort(key=lambda x: x["amount"], reverse=True)
 
         return balances

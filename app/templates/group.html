@@ -9,6 +9,7 @@
         <div>
 
             <h1>{{ group.name }}</h1>
+            <h2>Group ID: {{ group.id }}</h2>
 
             <div class="group-actions">
 
@@ -20,6 +21,11 @@
                 <a class="btn btn-primary"
                 href="{{ url_for('expense.checkbalances', groupid=group.id) }}">
                     Check Balances
+                </a>
+
+                <a class="btn btn-primary"
+                href="{{ url_for('settlement.settle', groupid=group.id) }}">
+                    Record a Settlement
                 </a>
 
             </div>

@@ -10,6 +10,7 @@ from .routes.auth import auth_bp
 from .routes.dashboard import dashboard_bp
 from .routes.group import group_bp
 from .routes.expense import expense_bp
+from .routes.settlements import settlement_bp
 
 
 def create_app():
@@ -28,5 +29,6 @@ def create_app():
     app.register_blueprint(dashboard_bp)
     app.register_blueprint(group_bp)
     app.register_blueprint(expense_bp)
+    app.register_blueprint(settlement_bp)
 
     return app

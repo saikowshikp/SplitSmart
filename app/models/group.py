@@ -24,6 +24,12 @@ class Group(db.Model):
         cascade="all, delete-orphan"
     )
 
+    settlements = db.relationship(
+        "Settlement",
+        back_populates="group",
+        cascade="all, delete-orphan"
+    )
+
     @staticmethod
     def get_group_by_id(group_id: int):
         return db.session.query(Group).filter_by(id = group_id).first()
