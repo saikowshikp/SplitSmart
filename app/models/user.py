@@ -68,6 +68,13 @@ class User(UserMixin, db.Model):
         db.session.commit()
 
         return user
+
+    def to_dict(self):
+        return {
+            "id":self.id,
+            "name":self.name,
+            "email":self.email
+        }
     
 
 

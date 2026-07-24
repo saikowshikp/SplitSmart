@@ -6,19 +6,33 @@
 
     <h1>Add Expense</h1>
 
+    <div class="button-row">
+        <a class="btn"
+            href="{{ url_for('group.group', groupid=group.id) }}">
+            ← Back to Group
+        </a>
+
+        <a class="btn btn-primary"
+            href="{{ url_for('receipt.scanreceipt', groupid=group.id) }}">
+            Scan Receipt
+        </a>
+    </div>
+
     <form method="POST" id="expense-form">
 
         <label>Title</label>
         <input
             type="text"
             name="title"
+            {% if draft %}
+                value="{{ draft['vendor_name'] }}"
+            {% endif %}
             required>
 
         <label>Description</label>
         <textarea
             name="description"
-            rows="3"
-            placeholder="Optional"></textarea>
+            rows="5">{% if draft %}{{ draft['description'] }}{% endif %}</textarea>
 
         <label>Paid By</label>
         <select name="payer">
@@ -36,6 +50,11 @@
             step="0.01"
             name="amount"
             id="amount"
+            {% if draft %}
+                value="{{ draft['total_amount'] }}"
+            {% else %}
+                value="0"
+            {% endif %}
             required>
 
         <h2>Split Between</h2>
@@ -43,6 +62,15 @@
         <div class="member-container">
 
         {% for member in members %}
+
+            {% if draft %}
+                {# Safely retrieve share checking both integer and string keys #}
+                {% set member_share = draft['member_shares'].get(member.id, draft['member_shares'].get(member.id|string, 0)) %}
+                {% set is_selected = member_share > 0 %}
+            {% else %}
+                {% set member_share = 0 %}
+                {% set is_selected = True %}
+            {% endif %}
 
             <div class="member-card">
 
@@ -53,7 +81,7 @@
                         name="members"
                         value="{{ member.id }}"
                         class="member-checkbox"
-                        checked>
+                        {% if is_selected %}checked{% endif %}>
 
                     <span>{{ member.name }}</span>
 
@@ -70,7 +98,7 @@
                         min="0"
                         step="0.01"
                         name="share_{{ member.id }}"
-                        value="0">
+                        value="{{ member_share }}">
 
                 </div>
 
@@ -96,39 +124,37 @@ const amountBox = document.getElementById("amount");
 const form = document.getElementById("expense-form");
 const error = document.getElementById("error");
 
-const checkboxes =
-document.querySelectorAll(".member-checkbox");
+const checkboxes = document.querySelectorAll(".member-checkbox");
 
-checkboxes.forEach(cb=>{
+// Ensure correct initial visibility on page load based on draft selection state
+checkboxes.forEach(cb => {
+    const div = document.getElementById("share_div_" + cb.value);
+    if (div) {
+        div.style.display = cb.checked ? "block" : "none";
+    }
 
-    cb.addEventListener("change",()=>{
-
-        const div =
-        document.getElementById(
-            "share_div_"+cb.value
-        );
-
-        div.style.display =
-            cb.checked ? "block":"none";
-
+    cb.addEventListener("change", () => {
+        const div = document.getElementById("share_div_" + cb.value);
+        if (div) {
+            div.style.display = cb.checked ? "block" : "none";
+        }
     });
-
 });
 
-form.addEventListener("submit",function(e){
+form.addEventListener("submit", function(e) {
 
     let total = 0;
     let selected = 0;
 
-    checkboxes.forEach(cb=>{
+    checkboxes.forEach(cb => {
 
-        if(cb.checked){
+        if (cb.checked) {
 
             selected++;
 
             total += parseFloat(
                 document.getElementsByName(
-                    "share_"+cb.value
+                    "share_" + cb.value
                 )[0].value || 0
             );
 
@@ -136,34 +162,30 @@ form.addEventListener("submit",function(e){
 
     });
 
-    const amount =
-    parseFloat(amountBox.value || 0);
+    const amount = parseFloat(amountBox.value || 0);
 
-    error.innerHTML="";
+    error.innerHTML = "";
 
-    if(amount<=0){
+    if (amount <= 0) {
 
         e.preventDefault();
-        error.innerHTML =
-        "Amount must be greater than 0.";
+        error.innerHTML = "Amount must be greater than 0.";
         return;
 
     }
 
-    if(selected===0){
+    if (selected === 0) {
 
         e.preventDefault();
-        error.innerHTML =
-        "Select at least one member.";
+        error.innerHTML = "Select at least one member.";
         return;
 
     }
 
-    if(Math.abs(total-amount)>0.01){
+    if (Math.abs(total - amount) > 0.01) {
 
         e.preventDefault();
-        error.innerHTML =
-        "Shares do not add up to the total amount.";
+        error.innerHTML = "Shares do not add up to the total amount.";
 
     }
 

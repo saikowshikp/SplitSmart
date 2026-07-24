@@ -1,0 +1,527 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+<h1>Review Receipt</h1>
+
+<form id="receiptForm" action="/reviewreceipt/{{group.id}}" method="POST">
+    
+    <!-- VENDOR NAME -->
+    <div class="form-section">
+
+        <label>Vendor Name</label>
+
+        <input
+            type="text"
+            id="vendor_name"
+            name="vendor_name"
+            required>
+
+    </div>
+    
+
+    <!-- ITEMS SECTION -->
+    <div class="form-section">
+
+        <div class="section-header">
+
+            <h2>Items</h2>
+            
+        </div>
+        
+        <div id="itemsContainer"></div>
+
+        <button
+            type="button"
+            class="btn btn-primary"
+            onclick="addItem()">
+
+            + Add Item
+
+        </button>
+
+    </div>
+
+    <!-- TAXES SECTION -->
+    <div class="form-section">
+
+        <div class="section-header">
+
+            <h2>Taxes</h2>
+
+            
+        </div>
+        
+        <div id="taxesContainer"></div>
+        <button
+            type="button"
+            class="btn btn-primary"
+            onclick="addTax()">
+
+            + Add Tax
+
+        </button>
+
+    </div>
+
+    <!-- DISCOUNTS SECTION -->
+    <div class="form-section">
+
+        <div class="section-header">
+
+            <h2>Discounts</h2>
+
+            
+        </div>
+        
+        <div id="discountsContainer"></div>
+        <button
+            type="button"
+            class="btn btn-primary"
+            onclick="addDiscount()">
+
+            + Add Discount
+
+        </button>
+
+    </div>
+
+    <!-- TOTAL SECTION -->
+    <div class="form-section">
+
+        <h2>Total</h2>
+
+        <label>Total Amount</label>
+
+        <div class="total-row">
+
+            <input
+                type="number"
+                step="0.01"
+                id="total"
+                name="total"
+                required>
+
+            <button
+                type="button"
+                class="btn"
+                onclick="calculateTotalFromData()">
+
+                Calculate
+
+            </button>
+
+        </div>
+
+    </div>
+
+    <!-- SUBMIT BUTTON -->
+    <div class="button-row">
+
+        <button
+            type="button"
+            onclick="submitExpense()">
+
+            Add Expense
+
+        </button>
+
+    </div>
+
+</form>
+</div>
+
+<script>
+// Data injected from Flask jinja template
+const receiptData = {{ receipt | tojson }};
+const membersData = {{ members | tojson }};
+
+let itemCounter = 0;
+let taxCounter = 0;
+let discountCounter = 0;
+
+// Initialize form values from receipt object
+window.onload = function() {
+    document.getElementById('vendor_name').value = receiptData.vendor_name || '';
+    document.getElementById('total').value = receiptData.total != null ? receiptData.total : 0.0;
+
+    // Load initial items
+    if (receiptData.items) {
+        for (const [name, cost] of Object.entries(receiptData.items)) {
+            addItem(name, cost);
+        }
+    }
+
+    // Load initial taxes
+    if (receiptData.taxes) {
+        for (const [name, amount] of Object.entries(receiptData.taxes)) {
+            addTax(name, amount);
+        }
+    }
+
+    // Load initial discounts
+    if (receiptData.discounts) {
+        for (const [name, amount] of Object.entries(receiptData.discounts)) {
+            addDiscount(name, amount);
+        }
+    }
+};
+
+// Add a new item block
+function addItem(name = '', cost = 0.0) {
+
+    const id = itemCounter++;
+
+    const container =
+    document.getElementById("itemsContainer");
+
+    const itemDiv =
+    document.createElement("div");
+
+    itemDiv.id = `item-group-${id}`;
+    itemDiv.className = "item-group";
+
+    let membersCheckboxes = "";
+    let memberSharesInputs = "";
+
+    membersData.forEach(member => {
+
+        membersCheckboxes += `
+
+        <label class="member-header">
+
+            <input
+                type="checkbox"
+                class="member-checkbox-${id}"
+                value="${member.id}"
+                onchange="toggleMemberShare(${id},${member.id})">
+
+            <span>${member.name}</span>
+
+        </label>
+
+        `;
+
+        memberSharesInputs += `
+
+        <div
+            id="share-container-${id}-${member.id}"
+            class="share-container"
+            style="display:none;">
+
+            <label>${member.name}'s Share</label>
+
+            <input
+                type="number"
+                step="0.01"
+                name="share_item_${id}_member_${member.id}"
+                class="item-share-${id}"
+                value="0">
+
+        </div>
+
+        `;
+
+    });
+
+    itemDiv.innerHTML = `
+        <div class="item-top">
+
+            <strong>Item ${id+1}</strong>
+
+            <input
+                type="text"
+                name="item_name_${id}"
+                class="item-name"
+                value="${name}"
+                placeholder="Item name"
+                required>
+
+            <input
+                type="number"
+                step="0.01"
+                id="item-cost-${id}"
+                name="item_cost_${id}"
+                class="item-cost cost-box"
+                value="${cost}"
+                placeholder="Cost"
+                required>
+
+            <button
+                type="button"
+                class="delete-btn"
+                onclick="deleteElement('item-group-${id}')">
+
+                ✕
+            </button>
+
+        </div>
+
+        <h4>Split Between</h4>
+
+        <div class="member-container">
+
+            ${membersCheckboxes}
+
+        </div>
+
+        <div class="shares-list">
+
+            ${memberSharesInputs}
+
+        </div>
+
+        <button
+            type="button"
+            class="btn"
+            onclick="splitEqually(${id})">
+
+            Split Equally
+
+        </button>
+
+    `;
+
+    container.appendChild(itemDiv);
+
+}
+
+// Show/Hide member share field based on checkbox state
+function toggleMemberShare(itemId, memberId){
+
+    const checkbox=document.querySelector(
+        `.member-checkbox-${itemId}[value="${memberId}"]`
+    );
+
+    const share=document.getElementById(
+        `share-container-${itemId}-${memberId}`
+    );
+
+    share.style.display=
+        checkbox.checked ? "block":"none";
+
+    if(!checkbox.checked){
+
+        share.querySelector("input").value=0;
+
+    }
+
+}
+
+// Split the cost of an item equally among checked members
+function splitEqually(itemId) {
+    const costInput = document.getElementById(`item-cost-${itemId}`);
+    const cost = parseFloat(costInput.value) || 0;
+    
+    const checkboxes = document.querySelectorAll(`.member-checkbox-${itemId}:checked`);
+    const count = checkboxes.length;
+
+    if (count === 0) {
+        alert("Please select at least one member to split the cost.");
+        return;
+    }
+
+    const sharePerPerson = (cost / count).toFixed(2);
+    
+    // Update active share inputs
+    checkboxes.forEach(cb => {
+        const memberId = cb.value;
+        const shareInput = document.querySelector(`#share-container-${itemId}-${memberId} input`);
+        if (shareInput) {
+            shareInput.value = sharePerPerson;
+        }
+    });
+}
+
+// Add tax entry
+function addTax(name='',amount=0){
+
+    const id = taxCounter++;
+
+    const div=document.createElement("div");
+
+    div.id=`tax-group-${id}`;
+
+    div.className="simple-card";
+
+    div.innerHTML=`
+
+        <div class="item-top">
+
+            <h3>Tax</h3>
+
+            
+            </div>
+            
+            <label>Name</label>
+            
+            <input
+            type="text"
+            name="tax_name_${id}"
+            value="${name}"
+            required>
+            
+            <label>Amount</label>
+            
+            <input
+            type="number"
+            step="0.01"
+            name="tax_amount_${id}"
+            class="tax-amount"
+            value="${amount}"
+            required>
+            
+            <button
+                type="button"
+                class="delete-btn"
+                onclick="deleteElement('tax-group-${id}')">
+
+                ✕
+
+            </button>
+            `;
+            
+    document
+        .getElementById("taxesContainer")
+        .appendChild(div);
+
+}
+
+// Add discount entry
+function addDiscount(name='',amount=0){
+
+    const id = discountCounter++;
+
+    const div=document.createElement("div");
+
+    div.id=`discount-group-${id}`;
+
+    div.className="simple-card";
+
+    div.innerHTML=`
+
+        <div class="item-top">
+
+            <h3>Discount</h3>
+
+            
+            </div>
+            
+            <label>Name</label>
+            
+            <input
+            type="text"
+            name="discount_name_${id}"
+            value="${name}"
+            required>
+            
+            <label>Amount</label>
+            
+        <input
+        type="number"
+        step="0.01"
+        name="discount_amount_${id}"
+        class="discount-amount"
+        value="${amount}"
+        required>
+        
+        <button
+            type="button"
+            class="delete-btn"
+            onclick="deleteElement('discount-group-${id}')">
+
+            ✕
+
+        </button>
+        `;
+        
+    document
+        .getElementById("discountsContainer")
+        .appendChild(div);
+
+}
+
+// Helper to remove dynamic components
+function deleteElement(elementId) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.parentNode.removeChild(element);
+    }
+}
+
+// Sum of (Items + Taxes - Discounts)
+function calculateTotalFromData() {
+    let totalItems = 0;
+    document.querySelectorAll('.item-cost').forEach(input => {
+        totalItems += parseFloat(input.value) || 0;
+    });
+
+    let totalTaxes = 0;
+    document.querySelectorAll('.tax-amount').forEach(input => {
+        totalTaxes += parseFloat(input.value) || 0;
+    });
+
+    let totalDiscounts = 0;
+    document.querySelectorAll('.discount-amount').forEach(input => {
+        totalDiscounts += parseFloat(input.value) || 0;
+    });
+
+    const calculatedTotal = (totalItems + totalTaxes - totalDiscounts).toFixed(2);
+    document.getElementById('total').value = calculatedTotal;
+}
+
+// Form validation and submission check
+function submitExpense() {
+    const itemGroups = document.querySelectorAll('.item-group');
+    
+    // 1. Check if sum of member shares adds up to item cost for every item
+    for (let i = 0; i < itemGroups.length; i++) {
+        const itemGroup = itemGroups[i];
+        const itemName = itemGroup.querySelector('.item-name').value || `Item ${i + 1}`;
+        const itemCost = parseFloat(itemGroup.querySelector('.item-cost').value) || 0;
+        
+        // Sum active share amounts
+        let totalShares = 0;
+        const visibleShareInputs = itemGroup.querySelectorAll('div[id^="share-container-"]:not([style*="display: none"]) input');
+        
+        visibleShareInputs.forEach(input => {
+            totalShares += parseFloat(input.value) || 0;
+        });
+
+        // Floating point precision tolerance check (0.01)
+        if (Math.abs(totalShares - itemCost) > 0.01) {
+            alert(`Validation Error: The split shares ($${totalShares.toFixed(2)}) for "${itemName}" do not add up to its total cost ($${itemCost.toFixed(2)}).`);
+            return;
+        }
+    }
+
+    // 2. Check if (Items + Taxes - Discounts) equals Total
+    let itemsSum = 0;
+    document.querySelectorAll('.item-cost').forEach(input => {
+        itemsSum += parseFloat(input.value) || 0;
+    });
+
+    let taxSum = 0;
+    document.querySelectorAll('.tax-amount').forEach(input => {
+        taxSum += parseFloat(input.value) || 0;
+    });
+
+    let discountSum = 0;
+    document.querySelectorAll('.discount-amount').forEach(input => {
+        discountSum += parseFloat(input.value) || 0;
+    });
+
+    const enteredTotal = parseFloat(document.getElementById('total').value) || 0;
+    const expectedTotal = itemsSum + taxSum - discountSum;
+
+    if (Math.abs(enteredTotal - expectedTotal) > 0.01) {
+        alert(`Validation Error: Sum of Items ($${itemsSum.toFixed(2)}) + Taxes ($${taxSum.toFixed(2)}) - Discounts ($${discountSum.toFixed(2)}) = $${expectedTotal.toFixed(2)}, which does not match Total ($${enteredTotal.toFixed(2)}).`);
+        return;
+    }
+
+    // Submit form if validation passes
+    document.getElementById('receiptForm').submit();
+}
+</script>
+
+{% endblock %}

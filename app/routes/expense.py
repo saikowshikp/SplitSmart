@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, url_for, redirect, flash
+from flask import Blueprint, render_template, request, url_for, redirect, flash, session
 
 from flask_login import login_required
 from flask_login import current_user
@@ -40,7 +40,8 @@ def viewexpense(expense_id):
 )
 @login_required
 def addexpense(groupid):
-
+    draft = session.pop('expense_draft', None)
+    print(draft)
     group = Group.get_group_by_id(groupid)
 
 
@@ -95,7 +96,8 @@ def addexpense(groupid):
         members=[
             m.user
             for m in group.members
-        ]
+        ],
+        draft = draft
     )
 
 

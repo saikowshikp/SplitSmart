@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="card">
+
+    <h1>Scan Receipt</h1>
+    <h3>{{group.name}}</h3>
+
+    <p>
+        Upload a clear photo of your receipt. The receipt will be scanned and you can review the extracted items before creating the expense.
+    </p>
+
+    <form
+        method="POST"
+        enctype="multipart/form-data"
+        id="receipt-form">
+
+        <label>Receipt Image</label>
+
+        <input
+            type="file"
+            id="receipt"
+            name="receipt"
+            accept="image/*"
+            required>
+
+        <img
+            id="preview"
+            class="receipt-preview"
+            style="display:none; max-width:100%; margin-top:20px; border-radius:10px;">
+
+        <p
+            id="error"
+            class="error-msg"></p>
+
+        <button type="submit">
+
+            Scan Receipt
+
+        </button>
+
+    </form>
+
+    <div class="group-actions">
+
+        <a
+            class="btn"
+            href="{{ url_for('expense.addexpense', groupid=group.id) }}">
+
+            ← Add Expense Manually
+
+        </a>
+
+        <a
+            class="btn"
+            href="{{ url_for('group.group', groupid=group.id) }}">
+
+            ← Back to Group
+
+        </a>
+
+    </div>
+
+</div>
+
+<script>
+
+const form = document.getElementById("receipt-form");
+const fileInput = document.getElementById("receipt");
+const preview = document.getElementById("preview");
+const error = document.getElementById("error");
+
+fileInput.addEventListener("change", function(){
+
+    const file = this.files[0];
+
+    if(!file){
+
+        preview.style.display = "none";
+        return;
+
+    }
+
+    if(!file.type.startsWith("image/")){
+
+        error.innerHTML = "Please upload an image file.";
+
+        preview.style.display = "none";
+
+        this.value = "";
+
+        return;
+
+    }
+
+    error.innerHTML = "";
+
+    const reader = new FileReader();
+
+    reader.onload = function(e){
+
+        preview.src = e.target.result;
+        preview.style.display = "block";
+
+    };
+
+    reader.readAsDataURL(file);
+
+});
+
+form.addEventListener("submit", function(e){
+
+    if(fileInput.files.length === 0){
+
+        e.preventDefault();
+
+        error.innerHTML = "Please select a receipt image.";
+
+    }
+
+});
+
+</script>
+
+{% endblock %}
