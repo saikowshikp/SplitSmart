@@ -8,6 +8,8 @@
 
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 </head>
 
 <body>
@@ -24,6 +26,43 @@
     {% if current_user.is_authenticated %}
 
     <div class="nav-links">
+
+        <div class="notification-wrapper">
+
+            <button type="button"
+                    id="notification-bell-btn"
+                    class="notification-link">
+                <div class="notification-icon">
+                    <i class="fa-solid fa-bell"></i>
+                    <span
+                        id="notification-badge"
+                        class="notification-badge"
+                        {% if unread_notification_count == 0 %}
+                            style="display:none;"
+                        {% endif %}
+                    >
+                        {{ unread_notification_count }}
+                    </span>
+                </div>
+            </button>
+
+            <div id="notification-dropdown" class="notification-dropdown" style="display:none;">
+
+                <div class="notification-dropdown-header">
+                    <span>Notifications</span>
+                    <button type="button" id="notification-clear-all-btn" class="notif-clear-all">
+                        Clear all
+                    </button>
+                </div>
+
+                <div id="notification-list" class="notification-list">
+                    <!-- populated by JS -->
+                    <div class="notification-empty">Loading...</div>
+                </div>
+
+            </div>
+
+        </div>
 
         <span>
             {{ current_user.name }}
@@ -72,4 +111,248 @@
 
 
 </body>
+<script>
+
+const NOTIFICATIONS_URL = "{{ url_for('notification.notifications') }}";
+const MARK_READ_URL = "{{ url_for('notification.mark_read') }}";
+const DELETE_ALL_URL = "{{ url_for('notification.delete_all') }}";
+// Template URL with a placeholder id (0) that we swap out at call time.
+const DELETE_URL_TEMPLATE = "{{ url_for('notification.delete', notif_id=0) }}";
+
+const bellBtn = document.getElementById("notification-bell-btn");
+const dropdown = document.getElementById("notification-dropdown");
+const listEl = document.getElementById("notification-list");
+const badge = document.getElementById("notification-badge");
+
+let dropdownOpen = false;
+
+function buildDeleteUrl(notifId)
+{
+    return DELETE_URL_TEMPLATE.replace(
+        /\/0(?!.*\/0)/,
+        "/" + notifId
+    );
+}
+
+async function updateNotificationCount()
+{
+    try
+    {
+        const response =
+            await fetch(
+                "{{ url_for('notification.notification_count') }}"
+            );
+
+        const data =
+            await response.json();
+
+        if(data.count > 0)
+        {
+            badge.style.display = "flex";
+            badge.innerText = data.count;
+        }
+        else
+        {
+            badge.style.display = "none";
+        }
+    }
+    catch(err)
+    {
+        console.log(
+            "Unable to fetch notification count."
+        );
+    }
+}
+
+function renderNotifications(notifications)
+{
+    if(!notifications || notifications.length === 0)
+    {
+        listEl.innerHTML =
+            '<div class="notification-empty">No notifications</div>';
+        return;
+    }
+
+    listEl.innerHTML = "";
+
+    notifications.forEach(function(notif)
+    {
+        const item = document.createElement("div");
+        item.className =
+            "notification-item" +
+            (notif.is_read ? "" : " notification-unread");
+        item.dataset.id = notif.id;
+
+        const link = document.createElement("a");
+        link.className = "notification-item-link";
+        link.href = notif.url;
+
+        const message = document.createElement("span");
+        message.className = "notification-message";
+        message.innerText = notif.message;
+
+        const time = document.createElement("span");
+        time.className = "notification-time";
+        time.innerText = notif.created_at;
+
+        link.appendChild(message);
+        link.appendChild(time);
+
+        const deleteBtn = document.createElement("button");
+        deleteBtn.type = "button";
+        deleteBtn.className = "notification-delete-btn";
+        deleteBtn.innerHTML = "&times;";
+        deleteBtn.addEventListener("click", function(e)
+        {
+            e.preventDefault();
+            e.stopPropagation();
+            deleteNotification(notif.id, item);
+        });
+
+        item.appendChild(link);
+        item.appendChild(deleteBtn);
+        listEl.appendChild(item);
+    });
+}
+
+async function fetchNotifications()
+{
+    try
+    {
+        listEl.innerHTML =
+            '<div class="notification-empty">Loading...</div>';
+
+        const response = await fetch(NOTIFICATIONS_URL);
+        const data = await response.json();
+
+        renderNotifications(data);
+    }
+    catch(err)
+    {
+        listEl.innerHTML =
+            '<div class="notification-empty">Unable to load notifications</div>';
+    }
+}
+
+async function deleteNotification(notifId, itemEl)
+{
+    try
+    {
+        await fetch(
+            buildDeleteUrl(notifId),
+            { method: "POST" }
+        );
+
+        itemEl.remove();
+
+        if(listEl.children.length === 0)
+        {
+            listEl.innerHTML =
+                '<div class="notification-empty">No notifications</div>';
+        }
+
+        updateNotificationCount();
+    }
+    catch(err)
+    {
+        console.log("Unable to delete notification.");
+    }
+}
+
+async function deleteAllNotifications()
+{
+    try
+    {
+        await fetch(
+            DELETE_ALL_URL,
+            { method: "POST" }
+        );
+
+        listEl.innerHTML =
+            '<div class="notification-empty">No notifications</div>';
+
+        updateNotificationCount();
+    }
+    catch(err)
+    {
+        console.log("Unable to clear notifications.");
+    }
+}
+
+async function markAllAsRead()
+{
+    try
+    {
+        await fetch(
+            MARK_READ_URL,
+            { method: "POST" }
+        );
+
+        updateNotificationCount();
+    }
+    catch(err)
+    {
+        console.log("Unable to mark notifications as read.");
+    }
+}
+
+function openDropdown()
+{
+    dropdown.style.display = "block";
+    dropdownOpen = true;
+    fetchNotifications();
+}
+
+function closeDropdown()
+{
+    if(!dropdownOpen)
+    {
+        return;
+    }
+
+    dropdown.style.display = "none";
+    dropdownOpen = false;
+    markAllAsRead();
+}
+
+bellBtn.addEventListener("click", function(e)
+{
+    e.stopPropagation();
+
+    if(dropdownOpen)
+    {
+        closeDropdown();
+    }
+    else
+    {
+        openDropdown();
+    }
+});
+
+document.getElementById("notification-clear-all-btn")
+    .addEventListener("click", function(e)
+{
+    e.stopPropagation();
+    deleteAllNotifications();
+});
+
+// Close dropdown when clicking anywhere outside it
+document.addEventListener("click", function(e)
+{
+    if(dropdownOpen &&
+       !dropdown.contains(e.target) &&
+       !bellBtn.contains(e.target))
+    {
+        closeDropdown();
+    }
+});
+
+// Update every 10 seconds
+updateNotificationCount();
+setInterval(
+    updateNotificationCount,
+    10000
+);
+
+</script>
 </html>

@@ -525,3 +525,78 @@ select:focus {
         align-items: stretch;
     }
 }
+
+.nav-links{
+    display:flex;
+    align-items:center;
+    gap:20px;
+}
+
+.notification-link{
+    text-decoration:none;
+    color:inherit;
+}
+
+.notification-icon{
+    position:relative;
+    font-size:24px;
+    cursor:pointer;
+}
+
+.notification-icon:hover{
+    color:#007bff;
+}
+
+.notification-badge{
+
+    position:absolute;
+
+    top:-8px;
+    right:-10px;
+
+    min-width:18px;
+    height:18px;
+
+    padding:0 4px;
+
+    background:#e53935;
+    color:white;
+
+    border-radius:50%;
+
+    font-size:11px;
+    font-weight:bold;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.notification-wrapper { position: relative; }
+.notification-dropdown {
+    position: absolute; top: 100%; right: 0;
+    width: 320px; max-height: 400px; overflow-y: auto;
+    background: #fff; border: 1px solid #ddd; border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000;
+    color: #222;
+}
+.notification-dropdown-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 14px; border-bottom: 1px solid #eee; font-weight: 600; color: #222;
+}
+.notif-clear-all { background: none; border: none; color: #666; cursor: pointer; font-size: 0.85em; }
+.notification-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 14px; border-bottom: 1px solid #f0f0f0;
+}
+.notification-item-link {
+    display: flex; flex-direction: column; text-decoration: none; color: #222; flex: 1;
+}
+.notification-unread { background: #f0f6ff; font-weight: 600; }
+.notification-message { font-size: 0.9em; color: #222}
+.notification-time { font-size: 0.75em; color: #888; }
+.notification-delete-btn {
+    background: none; border: none; color: #999; font-size: 1.1em; cursor: pointer; padding: 0 6px;
+}
+.notification-delete-btn:hover { color: #d33; }
+.notification-empty { padding: 16px; text-align: center; color: #888; }

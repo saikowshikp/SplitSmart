@@ -60,6 +60,14 @@ class User(UserMixin, db.Model):
         return cls.query.filter_by(email=email).first()
 
     @classmethod
+    def get_user_by_id(cls, id):
+        return cls.query.filter_by(id=id).first()
+
+    @classmethod
+    def exists(cls, id):
+        return cls.query.filter_by(id=id) is not None
+
+    @classmethod
     def add_user(cls, name, email, password):
         user = User(name=name, email=email)
         user.set_password(password)

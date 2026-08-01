@@ -58,6 +58,21 @@
             required>
 
         <h2>Split Between</h2>
+        <div class="button-row split-actions">
+            <button
+                type="button"
+                class="btn"
+                id="select-all-btn">
+                Select All
+            </button>
+
+            <button
+                type="button"
+                class="btn"
+                id="split-equally-btn">
+                Split Equally
+            </button>
+        </div> 
 
         <div class="member-container">
 
@@ -95,6 +110,7 @@
 
                     <input
                         type="number"
+                        class="share-box"
                         min="0"
                         step="0.01"
                         name="share_{{ member.id }}"
@@ -125,6 +141,8 @@ const form = document.getElementById("expense-form");
 const error = document.getElementById("error");
 
 const checkboxes = document.querySelectorAll(".member-checkbox");
+const selectAllBtn = document.getElementById("select-all-btn");
+const splitEquallyBtn = document.getElementById("split-equally-btn");
 
 // Ensure correct initial visibility on page load based on draft selection state
 checkboxes.forEach(cb => {
@@ -135,10 +153,87 @@ checkboxes.forEach(cb => {
 
     cb.addEventListener("change", () => {
         const div = document.getElementById("share_div_" + cb.value);
+        const input = document.getElementsByName("share_" + cb.value)[0];
         if (div) {
             div.style.display = cb.checked ? "block" : "none";
         }
+        if (!cb.checked) {
+            input.value = "0.00";
+        }
+        const allSelected = [...checkboxes].every(c => c.checked);
+        selectAllBtn.textContent = allSelected ? "Deselect All" : "Select All";
     });
+});
+
+selectAllBtn.textContent =
+    [...checkboxes].every(cb => cb.checked)
+        ? "Deselect All"
+        : "Select All";
+
+selectAllBtn.addEventListener("click", () => {
+
+    const allSelected = [...checkboxes].every(cb => cb.checked);
+
+    checkboxes.forEach(cb => {
+
+        cb.checked = !allSelected;
+
+        const div = document.getElementById("share_div_" + cb.value);
+        if (div) {
+            div.style.display = cb.checked ? "block" : "none";
+        }
+
+    });
+
+    selectAllBtn.textContent = allSelected ? "Select All" : "Deselect All";
+
+});
+
+splitEquallyBtn.addEventListener("click", () => {
+
+    const amount = parseFloat(amountBox.value);
+
+    if (isNaN(amount) || amount <= 0) {
+        error.innerHTML = "Enter a valid total amount first.";
+        return;
+    }
+
+    error.innerHTML = "";
+
+    const selected = [...checkboxes].filter(cb => cb.checked);
+
+    if (selected.length === 0) {
+        error.innerHTML = "Select at least one member.";
+        return;
+    }
+
+    checkboxes.forEach(cb => {
+        if (!cb.checked) {
+            document.getElementsByName("share_" + cb.value)[0].value = "0.00";
+        }
+    });
+
+    const equalShare = amount / selected.length;
+
+    let runningTotal = 0;
+
+    selected.forEach((cb, index) => {
+
+        const input = document.getElementsByName("share_" + cb.value)[0];
+
+        let value;
+
+        if (index === selected.length - 1) {
+            value = amount - runningTotal;
+        } else {
+            value = Number(equalShare.toFixed(2));
+            runningTotal += value;
+        }
+
+        input.value = value.toFixed(2);
+
+    });
+
 });
 
 form.addEventListener("submit", function(e) {

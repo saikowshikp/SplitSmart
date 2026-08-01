@@ -8,6 +8,7 @@ from app.models.expense import Expense
 
 from app.services.expense_service import ExpenseService
 from app.services.settlement_service import SettlementService
+from app.services.notification_service import NotificationService, NotificationType
 
 expense_bp = Blueprint("expense", __name__)
 
@@ -41,7 +42,6 @@ def viewexpense(expense_id):
 @login_required
 def addexpense(groupid):
     draft = session.pop('expense_draft', None)
-    print(draft)
     group = Group.get_group_by_id(groupid)
 
 
@@ -61,13 +61,23 @@ def addexpense(groupid):
             )
 
 
-        success, message = ExpenseService.create_expense(
+        success, message, expense = ExpenseService.create_expense(
             group_id=groupid,
             payer_id=int(request.form["payer"]),
             title=request.form["title"],
             description=request.form["description"],
             amount=float(request.form["amount"]),
             shares=shares
+        )
+
+        NotificationService.notify_group(
+            group_id=groupid,
+            excluded_users=[current_user.id],
+            actor_id=current_user.id,
+            type=NotificationType.EXPENSE_ADDED,
+            message=f"Added expense \"{expense.title}\"",
+            entity_type="expense",
+            entity_id=expense.id,
         )
 
 
@@ -164,6 +174,16 @@ def editexpense(expenseid):
             "success"
         )
 
+        NotificationService.notify_group(
+            group_id=expense.group_id,
+            excluded_users=[current_user.id],
+            actor_id=current_user.id,
+            type=NotificationType.EXPENSE_EDITED,
+            message=f"Edited expense \"{expense.title}\"",
+            entity_type="expense",
+            entity_id=expense.id,
+        )
+
         return redirect(
             url_for(
                 "group.group",
@@ -199,6 +219,16 @@ def deleteexpense(expenseid):
 
     ExpenseService.delete_expense(
         expense
+    )
+
+    NotificationService.notify_group(
+        group_id=expense.group_id,
+        excluded_users=[current_user.id],
+        actor_id=current_user.id,
+        type=NotificationType.EXPENSE_DELETED,
+        message=f"Deleted expense \"{expense.title}\"",
+        entity_type="group",
+        entity_id=expense.group_id,
     )
 
 

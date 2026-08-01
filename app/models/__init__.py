@@ -4,3 +4,4 @@ from .group_members import GroupMember
 from .expense import Expense
 from .expense_share import ExpenseShare
 from .settlements import Settlement
+from .notification import Notification

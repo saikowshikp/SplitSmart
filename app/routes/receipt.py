@@ -14,7 +14,6 @@ from flask_login import (
 )
 
 from app.models.group import Group
-from app.services.group_service import GroupService
 from app.services.receipt_parser_service import ReceiptParserService
 
 
@@ -82,7 +81,7 @@ def reviewreceipt(groupid):
         return redirect(url_for("dashboard.dashboard"))
 
     receipt = session.get("receipt")
-    print("\nreceipt is", receipt)
+    print(f"\nReceipt for User {current_user.id}, {current_user.name} is {receipt}")
 
     if receipt is None:
         flash("Please upload a receipt first.", "warning")

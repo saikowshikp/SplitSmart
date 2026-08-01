@@ -8,6 +8,7 @@ from app.models.group_members import GroupMember
 
 from app.forms.group_forms import JoinGroupForm, CreateGroupForm
 from app.services.group_service import GroupService
+from app.services.notification_service import NotificationService, NotificationType
 
 group_bp = Blueprint("group", __name__)
 
@@ -106,6 +107,18 @@ def joingroup():
         flash(
             "Joined group successfully.",
             "success"
+        )
+
+        group=Group.get_group_by_id(form.group_id.data)
+
+        NotificationService.notify_group(
+            group_id=group.id,
+            excluded_users=[current_user.id],
+            actor_id=current_user.id,
+            type=NotificationType.GROUP_JOINED,
+            message=f"Joined \"{group.name}\"",
+            entity_type="group",
+            entity_id=group.group_id,
         )
 
         return redirect(

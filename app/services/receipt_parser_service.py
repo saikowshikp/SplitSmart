@@ -14,6 +14,8 @@ from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
 from flask import current_app
 
+import time
+
 load_dotenv()
 
 class ReceiptParserService:
@@ -149,6 +151,8 @@ Receipt Text:
     @staticmethod
     def get_data(image_path):
 
+        start = time.perf_counter()
+
         raw_text = ReceiptParserService.extract_text(
             image_path
         )
@@ -156,7 +160,12 @@ Receipt Text:
         data = ReceiptParserService.parse_receipt(
             raw_text
         )
+        elapsed = time.perf_counter()-start
+        with open("timer.txt", 'a') as file:
+            file.write(f"{elapsed}\n")
 
-        print(type(data))
+        if os.path.exists(image_path):
+            os.remove(image_path)
+
 
         return data

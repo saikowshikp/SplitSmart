@@ -26,11 +26,11 @@ class ExpenseService:
     ):
 
         if len(shares) == 0:
-            return False, "Select at least one member."
+            return False, "Select at least one member.", None
         
         for _, share_amount in shares:
             if share_amount < 0:
-                return False, "Share amount cannot be negative"
+                return False, "Share amount cannot be negative", None
 
 
         total_share = sum(
@@ -40,10 +40,10 @@ class ExpenseService:
 
 
         if abs(total_share - amount) > 0.01:
-            return False, "Sum of shares must equal total amount."
+            return False, "Sum of shares must equal total amount.", None
 
 
-        expense_id = Expense.add_expense_without_commit(
+        expense = Expense.add_expense_without_commit(
             group_id=group_id,
             paid_by=payer_id,
             title=title,
@@ -54,11 +54,11 @@ class ExpenseService:
 
         ExpenseShare.add_expenseshares(
             shares=shares,
-            expense_id=expense_id
+            expense_id=expense.id
         )
 
 
-        return True, expense_id
+        return True, None, expense
 
 
 

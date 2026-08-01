@@ -72,7 +72,7 @@ class Expense(db.Model):
         )
         db.session.add(newExpense)
         db.session.flush()
-        return newExpense.id
+        return newExpense
     
     @staticmethod
     def delete_expense(id):
