@@ -57,9 +57,12 @@ class Expense(db.Model):
         cascade="all, delete-orphan"
     )
 
-    @staticmethod
-    def get_expense_by_id(expense_id):
-        return db.session.query(Expense).filter_by(id = expense_id).first()
+    @classmethod
+    def get_expense_by_id(cls, expense_id):
+        """Return Expense with given id"""
+        return db.session.get(cls, expense_id)
+
+        
 
     @staticmethod
     def add_expense_without_commit(group_id, paid_by, title, description, total_amount):

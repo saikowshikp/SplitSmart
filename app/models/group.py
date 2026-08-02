@@ -31,8 +31,12 @@ class Group(db.Model):
     )
 
     @staticmethod
-    def get_group_by_id(group_id: int):
-        return db.session.query(Group).filter_by(id = group_id).first()
+    def is_user_member(user_id, group):
+        return user_id in [gm.user.id for gm in group.members]
+
+    @classmethod
+    def get_group_by_id(cls, group_id: int):
+        return db.session.get(cls, group_id)
 
     @staticmethod
     def create_group(group_name, created_by):

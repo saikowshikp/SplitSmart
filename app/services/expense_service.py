@@ -1,8 +1,22 @@
 from app.models.expense import Expense
 from app.models.expense_share import ExpenseShare
+from app.models.group import Group
 
 
 class ExpenseService:
+
+    @staticmethod
+    def get_accessible_expense(expense_id, user_id):
+        """Return True if expense exists and user is part of expense.group. Else return False"""
+        expense = Expense.get_expense_by_id(expense_id)
+
+        if expense is None:
+            return None
+
+        if user_id in [gm.user.id for gm in expense.group.members]:
+            return expense
+
+        return None
 
 
     @staticmethod
@@ -32,6 +46,18 @@ class ExpenseService:
             if share_amount < 0:
                 return False, "Share amount cannot be negative", None
 
+        group=Group.get_group_by_id(group_id)
+        if group is None:
+            return False, "Unable to find group", None
+
+        if payer_id not in [gm.user.id for gm in group.members]:
+            return False, "Invalid Expense", None
+
+        for member_id, share in shares:
+            if member_id not in [gm.user.id for gm in group.members]:
+                return False, "Invalid Expense", None
+
+        
 
         total_share = sum(
             share[1]

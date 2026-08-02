@@ -10,27 +10,28 @@ from app.services.expense_service import ExpenseService
 from app.services.settlement_service import SettlementService
 from app.services.notification_service import NotificationService, NotificationType
 
+
 expense_bp = Blueprint("expense", __name__)
 
-@expense_bp.route("/viewexpense/<int:expense_id>")
+
+@expense_bp.get("/viewexpense/<int:expense_id>")
 @login_required
-def viewexpense(expense_id):
+def view_expense(expense_id: int):
+    """Display an expense if the current user has access to it."""
 
-    expense = Expense.get_expense_by_id(expense_id)
+    expense = ExpenseService.get_accessible_expense(
+        expense_id=expense_id,
+        user_id=current_user.id,
+    )
 
-
-    if not ExpenseService.user_has_access(
-        current_user.id,
-        expense
-    ):
-        flash("Cannot access expense", "info")
+    if expense is None:
+        flash("Expense not found.", "info")
         return redirect(url_for("dashboard.dashboard"))
-
 
     return render_template(
         "viewexpense.html",
         expense=expense,
-        shares=expense.shares
+        shares=expense.shares,
     )
 
 
@@ -43,6 +44,12 @@ def viewexpense(expense_id):
 def addexpense(groupid):
     draft = session.pop('expense_draft', None)
     group = Group.get_group_by_id(groupid)
+
+    if group is None or \
+        not Group.is_user_member(current_user.id, group):
+
+        flash("Group Not Found", "info")
+        return redirect(url_for("dashboard.dashboard"))
 
 
     if request.method == "POST":
@@ -70,6 +77,11 @@ def addexpense(groupid):
             shares=shares
         )
 
+
+        if not success:
+            flash(message,"danger")
+            return redirect(request.url)
+
         NotificationService.notify_group(
             group_id=groupid,
             excluded_users=[current_user.id],
@@ -79,12 +91,6 @@ def addexpense(groupid):
             entity_type="expense",
             entity_id=expense.id,
         )
-
-
-        if not success:
-            flash(message,"danger")
-            return redirect(request.url)
-
 
         flash(
             "Expense added successfully",
@@ -116,8 +122,11 @@ def addexpense(groupid):
 def editexpense(expenseid):
 
     expense = Expense.get_expense_by_id(expenseid)
+    group = expense.group
 
-    if expense is None:
+    if expense is None or \
+        current_user.id not in [gm.user.id for gm in group.members]:
+        
         flash("Expense not found.", "danger")
         return redirect(url_for("dashboard.dashboard"))
 

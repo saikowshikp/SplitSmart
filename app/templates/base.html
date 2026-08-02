@@ -68,10 +68,9 @@
             {{ current_user.name }}
         </span>
 
-        <a class="logout-btn"
-           href="{{ url_for('auth.logout') }}">
-            Logout
-        </a>
+        <form method="POST" action="{{ url_for('auth.logout') }}">
+            <button type="submit" class="logout-btn">Logout</button>
+        </form>
 
     </div>
 
